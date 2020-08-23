@@ -10,12 +10,21 @@ firebase.initializeApp({
   measurementId: "G-997NY58CV0"
 });
 
+// is used mainly to maintain the order between fields
 const orderArray = ["name", "surName", "telephone", "email", "image"];
 
+//references to the database
 var collectionReference = firebase.firestore().collection("visitkort");
 var queryToGetHighestID = collectionReference.orderBy("id", "desc").limit(1);
 
-let idCount;
+// ID variable to keep track of incrementation
+let idCount = 0;
+
+// ID variable used for modification and updating of card
+let toModifyID;
+
+// variable to contain image link
+let imageURL;
 
 // gets the highest ID of all items in the database
 queryToGetHighestID.get().then(function (querySnapshot) {
@@ -26,9 +35,7 @@ queryToGetHighestID.get().then(function (querySnapshot) {
 
 // pushes values to the database
 function addValues(id, imageURL) {
-  console.log(id);
   collectionReference.doc(String(id)).set({
-
     id: id,
     name: form.name.value,
     surName: form.surName.value,
@@ -36,22 +43,20 @@ function addValues(id, imageURL) {
     email: form.email.value,
     image: imageURL
   })
+  listCards(); //maybe just one
 }
 
+// creates and adds table representing a card onto interface
 function createCardGraphic(data) {
   var table = document.createElement('table');
   table.id =  + data.id + " table";
   table.className = "card";
-  table.style.width = '350px';
-  table.style.border = '1px solid black';
   var td = table.insertRow().insertCell();
-  td.style.borderBottom = '1px solid black';
-  td.style.textAlign = 'center';
   td.appendChild(document.createTextNode("Visitkort"));
-  for (temp in orderArray) {
+  for (element in orderArray) {
     var td = table.insertRow().insertCell();
-    var field = orderArray[temp];
-    td.appendChild(document.createTextNode(orderArray[temp] + ": " + data[orderArray[temp]]+ "\n"));
+    var field = orderArray[element];
+    td.appendChild(document.createTextNode(orderArray[element] + ": " + data[orderArray[element]]+ "\n"));
     }
   document.body.appendChild(table);
 }
@@ -61,8 +66,6 @@ function addButton(type, data) {
   var modifyButton = document.createElement('button');
   modifyButton.className = type + " button";
   modifyButton.id = data.id + "_" + type + "Button";
-  modifyButton.style.height = '27px';
-  modifyButton.style.margin = '5px';
   if (type == "modify") {
     modifyButton.innerHTML = "Ändra ovanstående visitkort";
   } else if (type == "remove") {
@@ -90,8 +93,6 @@ function listCards() {
   });
 }
 
-let imageURL;
-
 // encodes image as Base64
 function encodeImageAsURL(image) {
   var file = image.files[0];
@@ -105,7 +106,6 @@ function encodeImageAsURL(image) {
 
 // adds a new document to the database with data from the form
 function addCard() {
-  if (isNaN(idCount)) {idCount = 0;}
   idCount++;
   var storageReference = firebase.storage().ref();
   var imageReference = storageReference.child(idCount + "image");
@@ -116,9 +116,23 @@ function addCard() {
   addValues(idCount, "gs://visitkort-76fe8.appspot.com/" + idCount + "image")
 };
 
-// is supposed to modify currenttly displayed card
+// updates currenttly accessed card
 function updateCard() {
+  $("#updateButton").prop('disabled', true);
+  collectionReference.doc(toModifyID).update({
+    name: form.name.value,
+    surName: form.surName.value,
+    telephone: form.telephone.value,
+    email: form.email.value,
+  })
+  listCards();
+}
 
+// fills fields in form with data from provided document
+function fillFields(data) {
+  for (element in orderArray.slice(0,-1)) {
+    $("#" + orderArray[element]).val(data[orderArray[element]])
+  }
 }
 
 // removes document from database based on id
@@ -127,19 +141,16 @@ $(document).on("click", ".remove", function(event) {
   listCards();
 });
 
-// is supposed to allow for modification of a document based on id
+// allows for modification of a document based on id
 $(document).on("click", ".modify", function(event) {
-  var id = (this.id).split("_")[0];
-  var documentReference = collectionReference.doc(id);
-  documentReference.get().then(function(doc) {
-    console.log($("#name").value)
-    $("#name").value = doc.data()["name"];
-    $("#surName").value = doc.data()["surName"];
-    $("#telephone").value = doc.data()["telephone"];
-    $("#email").value = doc.data()["email"];
-    //$("#modifyButton".disabled = false);
+  toModifyID = (this.id).split("_")[0];
+  collectionReference.doc(toModifyID).get().then(function(doc) {
+    fillFields(doc.data());
+    $("#updateButton").prop('disabled', false);
+    window.scrollTo({top: 0, behavior: 'smooth'});
   })
 })
 
+$("#updateButton").click(updateCard);
 $("#addButton").click(addCard);
 $("#getButton").click(listCards);
