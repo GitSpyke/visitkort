@@ -116,15 +116,10 @@ function addCard() {
   addValues(idCount, "gs://visitkort-76fe8.appspot.com/" + idCount + "image")
 };
 
-// modifys currenttly displayed card
+// is supposed to modify currenttly displayed card
 function updateCard() {
 
 }
-//var name = document.getElementById("name").("form").elements["name"]
-// Create a Reference to 'mountains.jpg'
-//  addValues();
-//  key.putString(message).then(function(snapshot) {
-//    console.log(idCounter, 'Uploaded a card!');
 
 // removes document from database based on id
 $(document).on("click", ".remove", function(event) {
@@ -137,6 +132,7 @@ $(document).on("click", ".modify", function(event) {
   var id = (this.id).split("_")[0];
   var documentReference = collectionReference.doc(id);
   documentReference.get().then(function(doc) {
+    console.log($("#name").value)
     $("#name").value = doc.data()["name"];
     $("#surName").value = doc.data()["surName"];
     $("#telephone").value = doc.data()["telephone"];
