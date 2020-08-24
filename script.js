@@ -11,9 +11,11 @@ firebase.initializeApp({
 });
 
 // is used mainly to maintain the order between fields
-const orderArray = ["name", "surName", "telephone", "email", "image"];
+const orderArray = ["name", "surName", "telephone", "email"];
 
-//references to the database
+// reference to image storage
+var storageReference = firebase.storage().ref();
+//reference to the database
 var collectionReference = firebase.firestore().collection("visitkort");
 var queryToGetHighestID = collectionReference.orderBy("id", "desc").limit(1);
 
@@ -23,9 +25,6 @@ let idCount = 0;
 // ID variable used for modification and updating of card
 let toModifyID;
 
-// variable to contain image link
-let imageURL;
-
 // gets the highest ID of all items in the database
 queryToGetHighestID.get().then(function (querySnapshot) {
   querySnapshot.forEach(function (doc) {
@@ -34,44 +33,51 @@ queryToGetHighestID.get().then(function (querySnapshot) {
 })
 
 // pushes values to the database
-function addValues(id, imageURL) {
+function addValues(id) {
   collectionReference.doc(String(id)).set({
     id: id,
     name: form.name.value,
     surName: form.surName.value,
     telephone: form.telephone.value,
     email: form.email.value,
-    image: imageURL
+    image: id + "image"
   })
-  listCards(); //maybe just one
 }
 
-// creates and adds table representing a card onto interface
+// creates and adds table representing a card onto the interface
 function createCardGraphic(data) {
   var table = document.createElement('table');
-  table.id =  + data.id + " table";
+  //table.id =  + data.id + "table";
   table.className = "card";
   var td = table.insertRow().insertCell();
   td.appendChild(document.createTextNode("Visitkort"));
+  td.className = "cardHeader";
+  var imgtd = table.insertRow().insertCell();
+  storageReference.child(data["image"]).getDownloadURL().then(function(url) {
+    imgtd.innerHTML = "<img src=" + url + " height='40px' />";
+  // Get the download URL for 'images/stars.jpg'
+  // This can be inserted into an <img> tag
+  // This can also be downloaded directly
+});
   for (element in orderArray) {
     var td = table.insertRow().insertCell();
     var field = orderArray[element];
     td.appendChild(document.createTextNode(orderArray[element] + ": " + data[orderArray[element]]+ "\n"));
     }
-  document.body.appendChild(table);
+  $(".right").append(table);
 }
 
 // adds a button for modifying a specific card
 function addButton(type, data) {
-  var modifyButton = document.createElement('button');
-  modifyButton.className = type + " button";
-  modifyButton.id = data.id + "_" + type + "Button";
+  var tempButton = document.createElement('button');
+  tempButton.className = type + " button";
+  tempButton.id = data.id + "_" + type + "Button";
   if (type == "modify") {
-    modifyButton.innerHTML = "Ändra ovanstående visitkort";
+    tempButton.innerHTML = "Ändra ovanstående visitkort";
   } else if (type == "remove") {
-    modifyButton.innerHTML = "Ta bort ovanstående visitkort";
+    tempButton.innerHTML = "Ta bort ovanstående visitkort";
   }
-  document.body.appendChild(modifyButton);
+  $(".right").append(tempButton);
 }
 
 // removes currently listed cards and associated buttons
@@ -84,7 +90,7 @@ function removeListOfCards() {
 // lists all cards in the database
 function listCards() {
   removeListOfCards();
-  collectionReference.get().then(function(querySnapshot) {
+  collectionReference.orderBy("id", "desc").get().then(function(querySnapshot) {
     querySnapshot.forEach(function(doc) {
       createCardGraphic(doc.data());
       addButton("modify", doc.data());
@@ -98,7 +104,6 @@ function encodeImageAsURL(image) {
   var file = image.files[0];
   var reader = new FileReader();
   reader.onloadend = function() {
-    console.log('RESULT', reader.result)
     imageURL = reader.result;
   }
   reader.readAsDataURL(file);
@@ -107,13 +112,10 @@ function encodeImageAsURL(image) {
 // adds a new document to the database with data from the form
 function addCard() {
   idCount++;
-  var storageReference = firebase.storage().ref();
+  addValues(idCount)
   var imageReference = storageReference.child(idCount + "image");
-  var imageImagesReference = storageReference.child("images/count" + "image");
-  imageReference.putString(imageURL, 'data_url').then(function(snapshot) {
-    console.log('Uploaded the image as a base64 string!');
-  })
-  addValues(idCount, "gs://visitkort-76fe8.appspot.com/" + idCount + "image")
+  imageReference.putString(imageURL, 'data_url').then();
+  listCards() //maybe just one
 };
 
 // updates currenttly accessed card

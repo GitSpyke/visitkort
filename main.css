@@ -1,0 +1,71 @@
+.customHeader{
+  height: 40px;
+  line-height: 40px;
+  background: darkblue;
+  color: cyan;
+  text-align: center;
+  margin:-10px;
+  border-bottom-right-radius: 5px;
+  border-bottom-left-radius: 5px;
+}
+
+.bread {
+  list-style: none;
+  font: 15px;'
+  width: 100%;
+  background: grey;
+  display: block;
+  height:20px;
+}
+.bread li+li:before {
+    padding: 5px;
+    content: "/";
+}
+.bread li {
+  float: left;
+
+}
+.bread li #white {
+  color: white
+}
+
+.card {
+  margin-top: 5px;
+  width: 485px;
+  border:1px solid black
+}
+
+.button {
+  align: right;
+  height: 27px;
+  margin-top: 5px;
+  margin-bottom: 5px;
+}
+
+.left {
+}
+
+.right {
+  left: 50%
+}
+
+.column {
+  position: absolute;
+  top: 35px;
+  width: 50%;
+  padding-top: 5%;
+  padding-left: 10%;
+}
+
+.cardHeader {
+  border-bottom: 1px solid black;
+  text-align: center;
+}
+
+html {
+  overflow-y: scroll;
+}
+
+body {
+  font-family: Arial;
+}

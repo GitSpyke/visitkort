@@ -6,22 +6,24 @@
         <meta name="Visitkort" content="Visitkort">
         <link rel="stylesheet" href="bootstrap_themed.css">
         <link rel="stylesheet" href="main.css">
+        <script src="https://code.jquery.com/jquery-3.5.1.js"></script>
     </head>
     <body>
       <header class=customHeader>
         Visitkort
       </header>
+      <div class="left column">
       <form id="form">
-        <label for="name">namn:</label><br>
+        <label for="name">Namn:</label><br>
         <input type="text" id="name"><br>
-        <label for="surName">efternamn:</label><br>
+        <label for="surName">Efternamn:</label><br>
         <input type="text" id="surName" required><br>
-        <label for="telephone">telefonnummer:</label><br>
+        <label for="telephone">Telefonnummer:</label><br>
         <input type="text" id="telephone" required><br>
-        <label for="email">e-postadress:</label><br>
+        <label for="email">E-postadress:</label><br>
         <input type="email" id="email" required><br>
         <br>
-        <label for="image">ladda upp bild:</label><br>
+        <label for="image">Ladda upp bild:</label><br>
         <br>
         <input type="file" id="image" onchange="encodeImageAsURL(this)"/>
         <br>
@@ -31,7 +33,9 @@
       </form>
       <br>
       <button type="button" id="getButton">Visa alla visitkort</button>
-      <script src="jquery-3.5.1.min.js"></script>
+    </div>
+    <div class="right column" id="höger">
+    </div>
       <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-app.js"></script>
       <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-storage.js"></script>
       <script src="https://www.gstatic.com/firebasejs/7.19.0/firebase-firestore.js"></script>
