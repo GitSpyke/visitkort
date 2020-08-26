@@ -17,14 +17,16 @@ var storRef = firebase.storage().ref();
 // reference to the database (collectionReference)
 var collRef = firebase.firestore().collection("visitkort");
 // variable to keep track of ID incrementation
-var idCount = 0;
+var countID = 0;
 // ID variable used for modification and updating of related card
 var toModifyID;
+// varable that will represent any current image-endoding
+var imageString;
 
 // gets the highest ID of all items in the database
 collRef.orderBy("id", "desc").limit(1).get().then(function (querySnapshot) {
   querySnapshot.forEach(function (doc) {
-    idCount = doc.id;
+    countID = doc.id;
   })
 })
 
@@ -94,33 +96,36 @@ function encodeImageAsURL(image) {
   var file = image.files[0];
   var reader = new FileReader();
   reader.onloadend = function() {
-    imageURL = reader.result;
+    imageString = reader.result;
   }
   reader.readAsDataURL(file);
+};
+
+// uploads image as Base64 string to the image storage
+function uploadImage(id) {
+  var imgRef = storRef.child(id + "image");
+  imgRef.putString(imageString, 'data_url').then(function(snapshot) {
+  listCards() //maybe just one, also shouldn't be here if supposed to be dynamic
+  });
 }
 
 // adds a new document to the database with data from the form
 function addCard() {
-  addValues(idCount++)
-  var imageReference = storRef.child(idCount + "image");
-  imageReference.putString(imageURL, 'data_url').then(function(snapshot) {
-  listCards() //maybe just one
-  });
+  countID++;
+  addValues(countID);
+  uploadImage(countID)
 };
 
-// updates currenttly accessed card
+// updates currently accessed card
 function updateCard() {
   $("#updateButton").prop('disabled', true);
-  var imageReference = storRef.child(idCount + "image");
-  imageReference.putString(imageURL, 'data_url');
   collRef.doc(toModifyID).update({
     name: form.name.value,
     surName: form.surName.value,
     telephone: form.telephone.value,
     email: form.email.value,
-  }).then(function(snapshot) {
-  listCards() //maybe just one
-  })
+  });
+  uploadImage(toModifyID)
 }
 
 // fills fields in form with data from provided document
